@@ -38,6 +38,11 @@ def client_handler(_conn, _client):
             logger.error("Timeout connection without any data")
             break
 
+        # close conn on empty data
+        if not data_raw:
+            logger.info("Received empty data.")
+            break
+
         # format and parse data
         data = data_raw.decode('utf-8').split("\r\n")
         method = data[0].split(" ")[0]
@@ -65,10 +70,6 @@ def client_handler(_conn, _client):
         # send data
         _conn.send(str.encode(reply))
         logger.info(f"Sent reply")
-
-        if not data:
-            logger.info("Received empty data.")
-            break
 
     logger.info("Closed connection")
     _conn.close()
