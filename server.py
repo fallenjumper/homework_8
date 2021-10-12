@@ -23,14 +23,11 @@ def client_handler(_conn, _client):
     # set session timeout
     _conn.settimeout(timeout_connection)
 
-    # send welcome msg
-    _conn.send(str.encode("You connected to best socket server!\n"))
-
     # get data
     while True:
         try:
             data_raw = _conn.recv(1024)
-            logger.info(f"Received data")
+            logger.info(f"Received data {data_raw}")
         except ConnectionResetError:
             logger.warning("Received close singal.")
             break
@@ -62,14 +59,16 @@ def client_handler(_conn, _client):
 
         # construct reply
         tuple_src = (_client.split(':')[0], int(_client.split(':')[1]))
-        reply = f"Request Method: {method}\n" \
-                f"Request Source: {tuple_src}\n" \
-                f"Response Status: {res_status}\n" \
-                f"{chr(10).join(headers)}"
+        reply = f"HTTP/1.1 {res_status}\r\n" \
+                f"{(chr(13) + chr(10)).join(headers)}" \
+                f"Request Method: {method}\r\n" \
+                f"Request Source: {tuple_src}\r\n" \
+                f"Response Status: {res_status}\r\n" \
+                f"{(chr(13) + chr(10)).join(headers)}"
 
         # send data
         _conn.send(str.encode(reply))
-        logger.info(f"Sent reply")
+        logger.info(f"Sent reply {str.encode(reply)}")
 
     logger.info("Closed connection")
     _conn.close()
